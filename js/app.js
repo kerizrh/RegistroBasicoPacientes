@@ -414,14 +414,44 @@ document.addEventListener('DOMContentLoaded', () => {
                   .replace(/'/g, '&#039;');
     };
 
+    const patientSearch = document.getElementById('patient-search');
+    const filterStatus = document.getElementById('filter-status');
+
     const loadPatients = () => {
         try {
             const patients = PatientService.getAll();
             
-            if (patients.length === 0) {
+            // Obtener criterios de búsqueda y filtros activos
+            const searchTerm = patientSearch ? patientSearch.value.trim().toLowerCase() : '';
+            const statusFilter = filterStatus ? filterStatus.value : 'todos';
+
+            // Filtrar la lista
+            let filteredPatients = patients;
+            if (searchTerm) {
+                filteredPatients = filteredPatients.filter(p => 
+                    p.name.toLowerCase().includes(searchTerm) || 
+                    p.id.toLowerCase().includes(searchTerm)
+                );
+            }
+            if (statusFilter !== 'todos') {
+                filteredPatients = filteredPatients.filter(p => p.status === statusFilter);
+            }
+
+            if (filteredPatients.length === 0) {
                 patientsTbody.innerHTML = '';
                 patientsTable.classList.add('hidden');
                 emptyState.classList.remove('hidden');
+
+                // Actualizar textos de empty state dinámicamente
+                const titleEl = emptyState.querySelector('h3');
+                const descEl = emptyState.querySelector('p');
+                if (patients.length === 0) {
+                    if (titleEl) titleEl.textContent = 'No hay pacientes registrados';
+                    if (descEl) descEl.textContent = 'Comienza registrando un nuevo paciente haciendo clic en el botón superior.';
+                } else {
+                    if (titleEl) titleEl.textContent = 'Sin resultados de búsqueda';
+                    if (descEl) descEl.textContent = 'Intenta cambiar los términos de búsqueda o los filtros seleccionados.';
+                }
                 return;
             }
 
@@ -429,7 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
             emptyState.classList.add('hidden');
             patientsTbody.innerHTML = '';
 
-            patients.forEach(patient => {
+            filteredPatients.forEach(patient => {
                 const tr = document.createElement('tr');
                 
                 let badgeClass = 'badge-stable';
@@ -554,6 +584,23 @@ document.addEventListener('DOMContentLoaded', () => {
     window.loadPatients = loadPatients;
 
 
+    // Restaurar filtros de sessionStorage al cargar
+    if (patientSearch && filterStatus) {
+        patientSearch.value = sessionStorage.getItem('saludgest_search') || '';
+        filterStatus.value = sessionStorage.getItem('saludgest_status') || 'todos';
+
+        // Escuchar cambios para actualizar sessionStorage y recargar tabla
+        patientSearch.addEventListener('input', () => {
+            sessionStorage.setItem('saludgest_search', patientSearch.value);
+            loadPatients();
+        });
+
+        filterStatus.addEventListener('change', () => {
+            sessionStorage.setItem('saludgest_status', filterStatus.value);
+            loadPatients();
+        });
+    }
+
     // Inicializaciones básicas de la Fase 1 & 2
     initTheme();
     loadPatients();
@@ -566,6 +613,6 @@ document.addEventListener('DOMContentLoaded', () => {
         switchSection('dashboard');
     }
 
-    console.log('SaludGest inicializado correctamente - Fase 2 Renderizado Listo');
+    console.log('SaludGest inicializado correctamente - Fase 2 Filtros Completados');
 });
 
