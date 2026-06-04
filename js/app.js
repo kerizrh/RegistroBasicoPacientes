@@ -1,7 +1,8 @@
 /**
- * SaludGest - Orquestador Principal (Fase 2)
+ * SaludGest - Orquestador Principal (Fase 3)
  */
 import { PatientService } from './patientService.js';
+import { GeolocationHelper } from './geolocationHelper.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Inicializar iconos Lucide
@@ -350,6 +351,29 @@ document.addEventListener('DOMContentLoaded', () => {
     btnCancelPatient.addEventListener('click', closeModal);
     btnCloseModal.addEventListener('click', closeModal);
 
+    // Botón para geolocalizar al registrar paciente
+    const btnGetLocation = document.getElementById('btn-get-location');
+    if (btnGetLocation) {
+        btnGetLocation.addEventListener('click', async () => {
+            btnGetLocation.disabled = true;
+            const originalHTML = btnGetLocation.innerHTML;
+            btnGetLocation.innerHTML = '<div class="spinner text-xs" style="width:12px;height:12px;border-width:2px;margin:0;"></div> Obteniendo...';
+            
+            try {
+                const coords = await GeolocationHelper.getCurrentLocation();
+                pLat.value = coords.latitude.toFixed(6);
+                pLng.value = coords.longitude.toFixed(6);
+                showToast('Ubicación de ingreso capturada con éxito.', 'success');
+            } catch (error) {
+                showToast(error.message || 'No se pudo obtener la ubicación.', 'warning');
+            } finally {
+                btnGetLocation.disabled = false;
+                btnGetLocation.innerHTML = originalHTML;
+                if (window.lucide) window.lucide.createIcons();
+            }
+        });
+    }
+
     // Enviar formulario (Crear o Actualizar)
     patientForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -601,9 +625,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Inicializaciones básicas de la Fase 1 & 2
+    const loadDashboardLocation = async () => {
+        const metricLocation = document.getElementById('metric-location');
+        if (!metricLocation) return;
+        
+        try {
+            metricLocation.textContent = 'Obteniendo...';
+            const coords = await GeolocationHelper.getCurrentLocation();
+            metricLocation.textContent = `${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)}`;
+        } catch (error) {
+            metricLocation.textContent = 'No disponible';
+            console.log('Geolocalización en Dashboard no autorizada:', error.message);
+        }
+    };
+
+    // Inicializaciones básicas de la Fase 1, 2 & 3
     initTheme();
     loadPatients();
+    loadDashboardLocation();
     
     // Verificar si hay hash en la URL para navegar
     const currentHash = window.location.hash.replace('#', '');
@@ -613,6 +652,6 @@ document.addEventListener('DOMContentLoaded', () => {
         switchSection('dashboard');
     }
 
-    console.log('SaludGest inicializado correctamente - Fase 2 Filtros Completados');
+    console.log('SaludGest inicializado correctamente - Fase 3 Geolocalización Lista');
 });
 
