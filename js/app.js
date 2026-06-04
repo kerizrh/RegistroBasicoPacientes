@@ -471,14 +471,58 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.btn-delete-patient').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = btn.getAttribute('data-id');
-                // Se implementará en el Commit 2.5
-                showToast(`Iniciando eliminación del paciente ${id}...`, 'info');
+                openDeleteModal(id);
             });
         });
     };
 
+    /* -------------------------------------------------------------
+       MODAL DE CONFIRMACIÓN DE ELIMINACIÓN
+       ------------------------------------------------------------- */
+    const deleteModal = document.getElementById('delete-modal');
+    const deletePatientNameSpan = document.getElementById('delete-patient-name');
+    const btnCancelDelete = document.getElementById('btn-cancel-delete');
+    const btnConfirmDelete = document.getElementById('btn-confirm-delete');
+    let patientIdToDelete = null;
+
+    const openDeleteModal = (id) => {
+        try {
+            const patient = PatientService.getById(id);
+            if (!patient) {
+                showToast('No se encontró el registro del paciente.', 'danger');
+                return;
+            }
+            patientIdToDelete = id;
+            deletePatientNameSpan.textContent = patient.name;
+            deleteModal.classList.add('active');
+        } catch (error) {
+            showToast('Error al intentar abrir el diálogo de confirmación.', 'danger');
+        }
+    };
+
+    const closeDeleteModal = () => {
+        deleteModal.classList.remove('active');
+        patientIdToDelete = null;
+    };
+
+    btnCancelDelete.addEventListener('click', closeDeleteModal);
+
+    btnConfirmDelete.addEventListener('click', () => {
+        if (!patientIdToDelete) return;
+        try {
+            PatientService.delete(patientIdToDelete);
+            showToast('Paciente eliminado permanentemente.', 'success');
+            closeDeleteModal();
+            loadPatients();
+        } catch (error) {
+            showToast(error.message || 'Error al intentar eliminar el registro.', 'danger');
+            closeDeleteModal();
+        }
+    });
+
     // Exponer loadPatients globalmente para que sea accesible en otras fases
     window.loadPatients = loadPatients;
+
 
     // Inicializaciones básicas de la Fase 1 & 2
     initTheme();
