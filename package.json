@@ -7,6 +7,9 @@
     "dev": "npx vite --host",
     "build": "vite build"
   },
+  "devDependencies": {
+    "vite": "^5.2.0"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC"
