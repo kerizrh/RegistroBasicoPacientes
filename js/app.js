@@ -1,6 +1,7 @@
 /**
- * SaludGest - Orquestador Principal (Fase 1)
+ * SaludGest - Orquestador Principal (Fase 2)
  */
+import { PatientService } from './patientService.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Inicializar iconos Lucide
@@ -14,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeToggle = document.getElementById('theme-toggle');
     const pageTitle = document.getElementById('page-title');
     const pageSubtitle = document.getElementById('page-subtitle');
-    
+
     // Enlaces de navegación del menú
     const menuItems = {
         dashboard: document.getElementById('menu-dashboard'),
@@ -70,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleTheme = () => {
         const isDark = document.body.classList.toggle('dark');
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        
+
         const iconDark = themeToggle.querySelector('.icon-dark');
         const iconLight = themeToggle.querySelector('.icon-light');
         const btnText = themeToggle.querySelector('span');
@@ -166,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
 
         container.appendChild(toast);
-        
+
         if (window.lucide) {
             window.lucide.createIcons();
         }
@@ -182,9 +183,196 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3500);
     };
 
-    // Inicializaciones básicas de la Fase 1
+    /* -------------------------------------------------------------
+       MODAL DE PACIENTES, VALIDACIONES EN VIVO Y CREACIÓN
+       ------------------------------------------------------------- */
+    const patientModal = document.getElementById('patient-modal');
+    const patientForm = document.getElementById('patient-form');
+    const btnAddPatient = document.getElementById('btn-add-patient');
+    const btnCancelPatient = document.getElementById('btn-cancel-patient');
+    const btnCloseModal = document.getElementById('modal-close-btn');
+
+    // Elementos de formulario e inputs
+    const pId = document.getElementById('patient-id');
+    const pName = document.getElementById('p-name');
+    const pAge = document.getElementById('p-age');
+    const pGender = document.getElementById('p-gender');
+    const pPhone = document.getElementById('p-phone');
+    const pEmail = document.getElementById('p-email');
+    const pBlood = document.getElementById('p-blood');
+    const pStatus = document.getElementById('p-status');
+    const pLat = document.getElementById('p-lat');
+    const pLng = document.getElementById('p-lng');
+    const pNotes = document.getElementById('p-notes');
+
+    // Helpers para mostrar/limpiar errores visuales
+    const showFieldError = (inputEl, errorElId, message) => {
+        inputEl.classList.add('error');
+        const errSpan = document.getElementById(errorElId);
+        if (errSpan) errSpan.textContent = message;
+    };
+
+    const clearFieldError = (inputEl, errorElId) => {
+        inputEl.classList.remove('error');
+        const errSpan = document.getElementById(errorElId);
+        if (errSpan) errSpan.textContent = '';
+    };
+
+    // Funciones de validación individual
+    const validateName = () => {
+        if (!pName.value.trim() || pName.value.trim().length < 3) {
+            showFieldError(pName, 'err-p-name', 'El nombre debe tener al menos 3 caracteres.');
+            return false;
+        }
+        clearFieldError(pName, 'err-p-name');
+        return true;
+    };
+
+    const validateAge = () => {
+        const ageNum = parseInt(pAge.value, 10);
+        if (isNaN(ageNum) || ageNum < 0 || ageNum > 120) {
+            showFieldError(pAge, 'err-p-age', 'La edad debe ser un número válido entre 0 y 120.');
+            return false;
+        }
+        clearFieldError(pAge, 'err-p-age');
+        return true;
+    };
+
+    const validateGender = () => {
+        if (!pGender.value) {
+            showFieldError(pGender, 'err-p-gender', 'Selecciona el género del paciente.');
+            return false;
+        }
+        clearFieldError(pGender, 'err-p-gender');
+        return true;
+    };
+
+    const validatePhone = () => {
+        const phoneRegex = /^\+?[0-9\s-]{8,15}$/;
+        if (!pPhone.value.trim() || !phoneRegex.test(pPhone.value.trim())) {
+            showFieldError(pPhone, 'err-p-phone', 'Teléfono debe tener entre 8 y 15 dígitos.');
+            return false;
+        }
+        clearFieldError(pPhone, 'err-p-phone');
+        return true;
+    };
+
+    const validateEmail = () => {
+        if (pEmail.value.trim() === '') {
+            clearFieldError(pEmail, 'err-p-email');
+            return true;
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(pEmail.value.trim())) {
+            showFieldError(pEmail, 'err-p-email', 'Formato de correo incorrecto.');
+            return false;
+        }
+        clearFieldError(pEmail, 'err-p-email');
+        return true;
+    };
+
+    const validateBlood = () => {
+        if (!pBlood.value) {
+            showFieldError(pBlood, 'err-p-blood', 'Selecciona el tipo de sangre.');
+            return false;
+        }
+        clearFieldError(pBlood, 'err-p-blood');
+        return true;
+    };
+
+    // Listeners para validaciones en tiempo real
+    pName.addEventListener('input', validateName);
+    pAge.addEventListener('input', validateAge);
+    pGender.addEventListener('change', validateGender);
+    pPhone.addEventListener('input', validatePhone);
+    pEmail.addEventListener('input', validateEmail);
+    pBlood.addEventListener('change', validateBlood);
+
+    // Abrir modal
+    const openModal = () => {
+        resetForm();
+        document.getElementById('modal-title').textContent = 'Registrar Nuevo Paciente';
+        patientModal.classList.add('active');
+    };
+
+    // Cerrar modal
+    const closeModal = () => {
+        patientModal.classList.remove('active');
+        resetForm();
+    };
+
+    const resetForm = () => {
+        patientForm.reset();
+        pId.value = '';
+
+        // Limpiar estilos de error
+        [pName, pAge, pGender, pPhone, pEmail, pBlood, pStatus].forEach(el => el.classList.remove('error'));
+
+        // Limpiar textos de error
+        ['err-p-name', 'err-p-age', 'err-p-gender', 'err-p-phone', 'err-p-email', 'err-p-blood', 'err-p-status'].forEach(id => {
+            const span = document.getElementById(id);
+            if (span) span.textContent = '';
+        });
+    };
+
+    btnAddPatient.addEventListener('click', openModal);
+    btnCancelPatient.addEventListener('click', closeModal);
+    btnCloseModal.addEventListener('click', closeModal);
+
+    // Enviar formulario (Crear o Actualizar)
+    patientForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        // Validar todos los campos
+        const isNameValid = validateName();
+        const isAgeValid = validateAge();
+        const isGenderValid = validateGender();
+        const isPhoneValid = validatePhone();
+        const isEmailValid = validateEmail();
+        const isBloodValid = validateBlood();
+
+        if (!isNameValid || !isAgeValid || !isGenderValid || !isPhoneValid || !isEmailValid || !isBloodValid) {
+            showToast('Por favor, corrige los campos en rojo.', 'warning');
+            return;
+        }
+
+        const patientData = {
+            name: pName.value,
+            age: pAge.value,
+            gender: pGender.value,
+            phone: pPhone.value,
+            email: pEmail.value,
+            bloodType: pBlood.value,
+            status: pStatus.value,
+            latitude: pLat.value || null,
+            longitude: pLng.value || null,
+            notes: pNotes.value
+        };
+
+        try {
+            if (pId.value) {
+                // Modo Edición
+                PatientService.update(pId.value, patientData);
+                showToast('Datos del paciente actualizados con éxito.', 'success');
+            } else {
+                // Modo Creación
+                PatientService.create(patientData);
+                showToast('Paciente registrado con éxito en el sistema.', 'success');
+            }
+            closeModal();
+
+            // Recargar la tabla si la función existe
+            if (typeof window.loadPatients === 'function') {
+                window.loadPatients();
+            }
+        } catch (error) {
+            showToast(error.message || 'Error al guardar el paciente.', 'danger');
+        }
+    });
+
+    // Inicializaciones básicas de la Fase 1 & 2
     initTheme();
-    
+
     // Verificar si hay hash en la URL para navegar
     const currentHash = window.location.hash.replace('#', '');
     if (sections[currentHash]) {
@@ -193,5 +381,6 @@ document.addEventListener('DOMContentLoaded', () => {
         switchSection('dashboard');
     }
 
-    console.log('SaludGest inicializado correctamente - Fase 1 Shell Lista');
+    console.log('SaludGest inicializado correctamente - Fase 2 Lógica de Creación Lista');
 });
+
