@@ -20,8 +20,8 @@ export const DoctorsService = {
      */
     async getDoctorsOnDuty() {
         try {
-            // Consumo de API REST con parámetros seleccionados desde variables de entorno (.env)
-            const apiUrl = import.meta.env.VITE_API_DOCTORS_URL;
+            // Consumo seguro de la API REST (usando variable de entorno de Vite o fallback)
+            const apiUrl = (import.meta.env && import.meta.env.VITE_API_DOCTORS_URL);
             const response = await fetch(apiUrl);
 
             if (!response.ok) {
