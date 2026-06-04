@@ -301,6 +301,37 @@ document.addEventListener('DOMContentLoaded', () => {
         resetForm();
     };
 
+    // Abrir modal en modo edición
+    const openEditModal = (id) => {
+        try {
+            const patient = PatientService.getById(id);
+            if (!patient) {
+                showToast('No se encontró el registro del paciente.', 'danger');
+                return;
+            }
+            resetForm();
+
+            // Rellenar campos del formulario con los datos guardados
+            pId.value = patient.id;
+            pName.value = patient.name;
+            pAge.value = patient.age;
+            pGender.value = patient.gender;
+            pPhone.value = patient.phone;
+            pEmail.value = patient.email;
+            pBlood.value = patient.bloodType;
+            pStatus.value = patient.status;
+            pLat.value = patient.latitude || '';
+            pLng.value = patient.longitude || '';
+            pNotes.value = patient.notes || '';
+
+            document.getElementById('modal-title').textContent = 'Editar Datos de Paciente';
+            patientModal.classList.add('active');
+        } catch (error) {
+            showToast('Error al cargar datos del paciente.', 'danger');
+        }
+    };
+
+
     const resetForm = () => {
         patientForm.reset();
         pId.value = '';
@@ -462,8 +493,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.btn-edit-patient').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = btn.getAttribute('data-id');
-                // Se implementará en el Commit 2.6
-                showToast(`Cargando edición del paciente ${id}...`, 'info');
+                openEditModal(id);
             });
         });
 
