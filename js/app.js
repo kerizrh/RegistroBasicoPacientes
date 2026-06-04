@@ -361,18 +361,129 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             closeModal();
 
-            // Recargar la tabla si la función existe
-            if (typeof window.loadPatients === 'function') {
-                window.loadPatients();
-            }
+            loadPatients();
         } catch (error) {
             showToast(error.message || 'Error al guardar el paciente.', 'danger');
         }
     });
 
+    /* -------------------------------------------------------------
+       RENDERIZADO DE LA TABLA DE PACIENTES
+       ------------------------------------------------------------- */
+    const patientsTable = document.getElementById('patients-table');
+    const patientsTbody = document.getElementById('patients-list-tbody');
+    const emptyState = document.getElementById('patients-empty-state');
+
+    const escapeHtml = (str) => {
+        if (!str) return '';
+        return str.replace(/&/g, '&amp;')
+                  .replace(/</g, '&lt;')
+                  .replace(/>/g, '&gt;')
+                  .replace(/"/g, '&quot;')
+                  .replace(/'/g, '&#039;');
+    };
+
+    const loadPatients = () => {
+        try {
+            const patients = PatientService.getAll();
+            
+            if (patients.length === 0) {
+                patientsTbody.innerHTML = '';
+                patientsTable.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            patientsTable.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+            patientsTbody.innerHTML = '';
+
+            patients.forEach(patient => {
+                const tr = document.createElement('tr');
+                
+                let badgeClass = 'badge-stable';
+                if (patient.status === 'En Observación') badgeClass = 'badge-obs';
+                if (patient.status === 'Crítico') badgeClass = 'badge-critical';
+                if (patient.status === 'Alta') badgeClass = 'badge-released';
+
+                const locationText = (patient.latitude && patient.longitude)
+                    ? `${parseFloat(patient.latitude).toFixed(4)}, ${parseFloat(patient.longitude).toFixed(4)}`
+                    : 'No registrada';
+
+                tr.innerHTML = `
+                    <td>
+                        <div class="patient-info-cell">
+                            <span class="patient-name-text">${escapeHtml(patient.name)}</span>
+                            <span class="patient-id-text">${patient.id}</span>
+                        </div>
+                    </td>
+                    <td>${patient.age} años / ${patient.gender}</td>
+                    <td>
+                        <div class="flex flex-col">
+                            <span>${escapeHtml(patient.phone)}</span>
+                            <span class="text-xs text-muted">${escapeHtml(patient.email) || 'Sin correo'}</span>
+                        </div>
+                    </td>
+                    <td><span class="badge bg-light-primary text-primary">${patient.bloodType}</span></td>
+                    <td><span class="badge ${badgeClass}">${patient.status}</span></td>
+                    <td>
+                        <span class="text-sm flex items-center gap-1">
+                            <i data-lucide="map-pin" class="text-muted" style="width: 14px; height: 14px;"></i>
+                            <span>${locationText}</span>
+                        </span>
+                    </td>
+                    <td class="text-right">
+                        <div class="action-cell">
+                            <button class="btn-icon btn-edit-patient" data-id="${patient.id}" title="Editar">
+                                <i data-lucide="edit-3"></i>
+                            </button>
+                            <button class="btn-icon btn-icon-danger btn-delete-patient" data-id="${patient.id}" title="Eliminar">
+                                <i data-lucide="trash-2"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                patientsTbody.appendChild(tr);
+            });
+
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+
+            // Exponer las acciones de edición y eliminación
+            bindListActions();
+        } catch (error) {
+            showToast('Error al cargar la lista de pacientes.', 'danger');
+        }
+    };
+
+    const bindListActions = () => {
+        // Botones de editar
+        document.querySelectorAll('.btn-edit-patient').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.getAttribute('data-id');
+                // Se implementará en el Commit 2.6
+                showToast(`Cargando edición del paciente ${id}...`, 'info');
+            });
+        });
+
+        // Botones de eliminar
+        document.querySelectorAll('.btn-delete-patient').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.getAttribute('data-id');
+                // Se implementará en el Commit 2.5
+                showToast(`Iniciando eliminación del paciente ${id}...`, 'info');
+            });
+        });
+    };
+
+    // Exponer loadPatients globalmente para que sea accesible en otras fases
+    window.loadPatients = loadPatients;
+
     // Inicializaciones básicas de la Fase 1 & 2
     initTheme();
-
+    loadPatients();
+    
     // Verificar si hay hash en la URL para navegar
     const currentHash = window.location.hash.replace('#', '');
     if (sections[currentHash]) {
@@ -381,6 +492,6 @@ document.addEventListener('DOMContentLoaded', () => {
         switchSection('dashboard');
     }
 
-    console.log('SaludGest inicializado correctamente - Fase 2 Lógica de Creación Lista');
+    console.log('SaludGest inicializado correctamente - Fase 2 Renderizado Listo');
 });
 
