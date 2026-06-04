@@ -20,8 +20,11 @@ export const DoctorsService = {
      */
     async getDoctorsOnDuty() {
         try {
-            // Consumo seguro de la API REST (usando variable de entorno de Vite o fallback)
-            const apiUrl = (import.meta.env && import.meta.env.VITE_API_DOCTORS_URL);
+            // Consumo de la API REST usando la variable de entorno configurada
+            const apiUrl = import.meta.env.VITE_API_DOCTORS_URL;
+            if (!apiUrl) {
+                throw new Error('Error de configuración: La variable VITE_API_DOCTORS_URL no está definida.');
+            }
             const response = await fetch(apiUrl);
 
             if (!response.ok) {
