@@ -92,6 +92,16 @@ document.addEventListener('DOMContentLoaded', () => {
             btnText.textContent = 'Tema Oscuro';
             showToast('Modo claro activado', 'info');
         }
+
+        // Sincronizar colores de Chart.js con el tema
+        if (statusChart) {
+            const textColor = isDark ? '#e2e8f0' : '#1e293b';
+            statusChart.options.plugins.legend.labels.color = textColor;
+            statusChart.options.plugins.tooltip.backgroundColor = isDark ? '#1e293b' : '#ffffff';
+            statusChart.options.plugins.tooltip.titleColor = isDark ? '#ffffff' : '#1e293b';
+            statusChart.options.plugins.tooltip.bodyColor = isDark ? '#cbd5e1' : '#475569';
+            statusChart.update();
+        }
     };
 
     themeToggle.addEventListener('click', toggleTheme);
@@ -446,14 +456,90 @@ document.addEventListener('DOMContentLoaded', () => {
     const filterStatus = document.getElementById('filter-status');
 
     /* -------------------------------------------------------------
-       INTEGRACIÓN DE WEB WORKER PARA ESTADÍSTICAS
+       INTEGRACIÓN DE WEB WORKER & CHART.JS PARA ESTADÍSTICAS
        ------------------------------------------------------------- */
+    let statusChart = null;
+
     const updateStatistics = () => {
         try {
             const patients = PatientService.getAll();
             statsWorker.postMessage(patients);
         } catch (error) {
             console.error('Error al enviar datos al Web Worker:', error);
+        }
+    };
+
+    const initOrUpdateChart = (stats) => {
+        const ctx = document.getElementById('chart-status');
+        if (!ctx) return;
+
+        const isDark = document.body.classList.contains('dark');
+        const textColor = isDark ? '#e2e8f0' : '#1e293b';
+        
+        const labels = Object.keys(stats.byStatus);
+        const dataValues = Object.values(stats.byStatus);
+
+        if (statusChart) {
+            // Actualizar datos del gráfico existente
+            statusChart.data.datasets[0].data = dataValues;
+            statusChart.options.plugins.legend.labels.color = textColor;
+            statusChart.options.plugins.tooltip.backgroundColor = isDark ? '#1e293b' : '#ffffff';
+            statusChart.options.plugins.tooltip.titleColor = isDark ? '#ffffff' : '#1e293b';
+            statusChart.options.plugins.tooltip.bodyColor = isDark ? '#cbd5e1' : '#475569';
+            statusChart.update();
+        } else {
+            // Crear instancia nueva de Chart.js
+            statusChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataValues,
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.75)',  // Estable - Verde
+                            'rgba(245, 158, 11, 0.75)',  // En Observación - Naranja
+                            'rgba(239, 68, 68, 0.75)',   // Crítico - Rojo
+                            'rgba(14, 165, 233, 0.75)'   // Alta - Azul
+                        ],
+                        borderColor: [
+                            'rgb(16, 185, 129)',
+                            'rgb(245, 158, 11)',
+                            'rgb(239, 68, 68)',
+                            'rgb(14, 165, 233)'
+                        ],
+                        borderWidth: 2,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: textColor,
+                                font: {
+                                    family: 'Inter',
+                                    size: 12,
+                                    weight: '500'
+                                },
+                                padding: 15
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                            titleColor: isDark ? '#ffffff' : '#1e293b',
+                            bodyColor: isDark ? '#cbd5e1' : '#475569',
+                            borderColor: 'rgba(0,0,0,0.08)',
+                            borderWidth: 1,
+                            padding: 10,
+                            boxPadding: 6
+                        }
+                    },
+                    cutout: '72%'
+                }
+            });
         }
     };
 
@@ -480,7 +566,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Guardar estadísticas para uso de gráficos en el siguiente commit
+        // Inicializar o actualizar gráfico de distribución por estado
+        initOrUpdateChart(stats);
+
+        // Guardar estadísticas para uso global
         window.dashboardStats = stats;
         
         // Disparar evento por si otros componentes necesitan enterarse
