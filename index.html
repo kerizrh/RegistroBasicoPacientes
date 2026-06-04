@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaludGest - Registro de Pacientes</title>
+    <!-- Google Fonts: Outfit & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js CDN (Para la Fase 4) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar de Navegación -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon">
+                    <i data-lucide="activity" class="text-primary animate-pulse"></i>
+                </div>
+                <span class="brand-name">SaludGest</span>
+            </div>
+            
+            <nav class="sidebar-menu">
+                <a href="#dashboard" class="menu-item active" id="menu-dashboard">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#pacientes" class="menu-item" id="menu-pacientes">
+                    <i data-lucide="users"></i>
+                    <span>Pacientes</span>
+                </a>
+                <a href="#medicos" class="menu-item" id="menu-medicos">
+                    <i data-lucide="heart-handshake"></i>
+                    <span>Personal Médico</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button id="theme-toggle" class="theme-btn" aria-label="Cambiar tema">
+                    <i data-lucide="moon" class="icon-dark"></i>
+                    <i data-lucide="sun" class="icon-light hidden"></i>
+                    <span>Tema Oscuro</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Contenido Principal -->
+        <main class="main-content">
+            <!-- Header Superior -->
+            <header class="main-header">
+                <div class="header-left">
+                    <button class="mobile-menu-toggle" id="mobile-toggle" aria-label="Abrir menú">
+                        <i data-lucide="menu"></i>
+                    </button>
+                    <div class="welcome-text">
+                        <h1 id="page-title">Dashboard</h1>
+                        <p class="text-muted" id="page-subtitle">Bienvenido al sistema de gestión de pacientes</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="user-profile">
+                        <div class="user-avatar">
+                            <i data-lucide="user"></i>
+                        </div>
+                        <div class="user-info">
+                            <span class="user-name">Dr. Administrador</span>
+                            <span class="user-role">Ingeniería de Software</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Contenedor Dinámico de Vistas -->
+            <div class="content-body">
+                
+                <!-- Sección: Dashboard -->
+                <section id="section-dashboard" class="app-section active">
+                    <!-- Tarjetas de Métricas -->
+                    <div class="metrics-grid">
+                        <div class="metric-card card">
+                            <div class="metric-header">
+                                <span class="metric-title">Total Pacientes</span>
+                                <div class="metric-icon bg-light-primary">
+                                    <i data-lucide="users" class="text-primary"></i>
+                                </div>
+                            </div>
+                            <div class="metric-value" id="metric-total-patients">0</div>
+                            <div class="metric-footer">
+                                <span class="text-success"><i data-lucide="trending-up"></i> Activos</span> en el sistema
+                            </div>
+                        </div>
+
+                        <div class="metric-card card">
+                            <div class="metric-header">
+                                <span class="metric-title">Estado Crítico</span>
+                                <div class="metric-icon bg-light-danger">
+                                    <i data-lucide="alert-triangle" class="text-danger"></i>
+                                </div>
+                            </div>
+                            <div class="metric-value" id="metric-critical-patients">0</div>
+                            <div class="metric-footer text-danger" id="metric-critical-desc">
+                                Requieren atención inmediata
+                            </div>
+                        </div>
+
+                        <div class="metric-card card">
+                            <div class="metric-header">
+                                <span class="metric-title">Edad Promedio</span>
+                                <div class="metric-icon bg-light-warning">
+                                    <i data-lucide="calendar" class="text-warning"></i>
+                                </div>
+                            </div>
+                            <div class="metric-value" id="metric-avg-age">0.0</div>
+                            <div class="metric-footer">
+                                Años de edad promedio
+                            </div>
+                        </div>
+
+                        <div class="metric-card card">
+                            <div class="metric-header">
+                                <span class="metric-title">Ubicación Actual</span>
+                                <div class="metric-icon bg-light-success">
+                                    <i data-lucide="map-pin" class="text-success"></i>
+                                </div>
+                            </div>
+                            <div class="metric-value text-medium" id="metric-location">Obteniendo...</div>
+                            <div class="metric-footer" id="metric-location-desc">
+                                Coordenadas de tu sesión
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Panel de Gráficos e Información Rápida -->
+                    <div class="dashboard-grid mt-6">
+                        <div class="card chart-container">
+                            <h3>Distribución por Estado de Salud</h3>
+                            <p class="text-muted mb-4">Métricas procesadas vía Web Worker</p>
+                            <div class="chart-wrapper">
+                                <canvas id="chart-status"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="card list-preview-container">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3>Médicos de Guardia</h3>
+                                <span class="badge bg-primary-soft text-primary" id="staff-count">Cargando...</span>
+                            </div>
+                            <div class="doctors-preview-list" id="dashboard-doctors-list">
+                                <!-- Se carga mediante API Fetch -->
+                                <div class="loading-state">
+                                    <div class="spinner"></div>
+                                    <p>Obteniendo personal médico de la API...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Sección: Pacientes (CRUD) -->
+                <section id="section-pacientes" class="app-section">
+                    <!-- Control y Filtros del CRUD -->
+                    <div class="action-bar card mb-6">
+                        <div class="search-box">
+                            <i data-lucide="search" class="search-icon"></i>
+                            <input type="text" id="patient-search" placeholder="Buscar paciente por nombre o ID...">
+                        </div>
+                        <div class="filter-group">
+                            <select id="filter-status" class="form-select">
+                                <option value="todos">Todos los Estados</option>
+                                <option value="Estable">Estable</option>
+                                <option value="En Observación">En Observación</option>
+                                <option value="Crítico">Crítico</option>
+                                <option value="Alta">Alta</option>
+                            </select>
+                            <button class="btn btn-primary" id="btn-add-patient">
+                                <i data-lucide="user-plus"></i>
+                                <span>Registrar Paciente</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Lista de Pacientes -->
+                    <div class="card table-container">
+                        <div class="table-responsive">
+                            <table class="table" id="patients-table">
+                                <thead>
+                                    <tr>
+                                        <th>Paciente</th>
+                                        <th>Edad / Género</th>
+                                        <th>Contacto</th>
+                                        <th>Grupo Sanguíneo</th>
+                                        <th>Estado</th>
+                                        <th>Ubicación Ingreso</th>
+                                        <th class="text-right">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="patients-list-tbody">
+                                    <!-- Cargado dinámicamente -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="empty-state hidden" id="patients-empty-state">
+                            <div class="empty-icon">
+                                <i data-lucide="users-round"></i>
+                            </div>
+                            <h3>No hay pacientes registrados</h3>
+                            <p class="text-muted">Comienza registrando un nuevo paciente haciendo clic en el botón superior.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Sección: Personal Médico -->
+                <section id="section-medicos" class="app-section">
+                    <div class="card mb-6">
+                        <div class="flex justify-between items-center flex-wrap gap-4">
+                            <div>
+                                <h2>Directorio Médico de Guardia</h2>
+                                <p class="text-muted">Lista de personal médico y especialistas de turno obtenida en tiempo real desde la API REST.</p>
+                            </div>
+                            <button class="btn btn-secondary" id="btn-refresh-doctors">
+                                <i data-lucide="rotate-cw"></i>
+                                <span>Actualizar Directorio</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="doctors-grid" id="doctors-list-grid">
+                        <!-- Cargado dinámicamente vía API Fetch -->
+                        <div class="loading-state card">
+                            <div class="spinner"></div>
+                            <p>Cargando médicos activos...</p>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- MODALES -->
+    
+    <!-- Modal: Agregar/Editar Paciente -->
+    <div class="modal" id="patient-modal">
+        <div class="modal-content card">
+            <div class="modal-header">
+                <h3 id="modal-title">Registrar Nuevo Paciente</h3>
+                <button class="modal-close" id="modal-close-btn" aria-label="Cerrar modal">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <form id="patient-form">
+                <input type="hidden" id="patient-id">
+                <div class="modal-body">
+                    <div class="form-grid">
+                        <div class="form-group col-span-2">
+                            <label for="p-name">Nombre Completo <span class="required">*</span></label>
+                            <input type="text" id="p-name" class="form-control" required placeholder="Ej. Juan Pérez">
+                            <span class="error-msg" id="err-p-name"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="p-age">Edad <span class="required">*</span></label>
+                            <input type="number" id="p-age" class="form-control" min="0" max="120" required placeholder="Ej. 34">
+                            <span class="error-msg" id="err-p-age"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="p-gender">Género <span class="required">*</span></label>
+                            <select id="p-gender" class="form-select" required>
+                                <option value="" disabled selected>Seleccione...</option>
+                                <option value="Masculino">Masculino</option>
+                                <option value="Femenino">Femenino</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                            <span class="error-msg" id="err-p-gender"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="p-phone">Teléfono <span class="required">*</span></label>
+                            <input type="tel" id="p-phone" class="form-control" required placeholder="Ej. +503 1234-5678">
+                            <span class="error-msg" id="err-p-phone"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="p-email">Correo Electrónico</label>
+                            <input type="email" id="p-email" class="form-control" placeholder="Ej. juan.perez@email.com">
+                            <span class="error-msg" id="err-p-email"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="p-blood">Grupo Sanguíneo <span class="required">*</span></label>
+                            <select id="p-blood" class="form-select" required>
+                                <option value="" disabled selected>Seleccione...</option>
+                                <option value="O+">O Positivo (O+)</option>
+                                <option value="O-">O Negativo (O-)</option>
+                                <option value="A+">A Positivo (A+)</option>
+                                <option value="A-">A Negativo (A-)</option>
+                                <option value="B+">B Positivo (B+)</option>
+                                <option value="B-">B Negativo (B-)</option>
+                                <option value="AB+">AB Positivo (AB+)</option>
+                                <option value="AB-">AB Negativo (AB-)</option>
+                            </select>
+                            <span class="error-msg" id="err-p-blood"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="p-status">Estado de Salud <span class="required">*</span></label>
+                            <select id="p-status" class="form-select" required>
+                                <option value="Estable">Estable</option>
+                                <option value="En Observación">En Observación</option>
+                                <option value="Crítico">Crítico</option>
+                                <option value="Alta">Alta</option>
+                            </select>
+                            <span class="error-msg" id="err-p-status"></span>
+                        </div>
+
+                        <div class="form-group col-span-2">
+                            <label class="flex items-center justify-between">
+                                <span>Coordenadas de Ingreso</span>
+                                <button type="button" class="btn-text" id="btn-get-location">
+                                    <i data-lucide="map-pin"></i> Obtener Ubicación Actual
+                                </button>
+                            </label>
+                            <div class="location-input-group">
+                                <input type="text" id="p-lat" class="form-control" placeholder="Latitud (ej. 13.6893)" readonly>
+                                <input type="text" id="p-lng" class="form-control" placeholder="Longitud (ej. -89.1872)" readonly>
+                            </div>
+                            <span class="help-text">La ubicación se captura automáticamente o mediante el botón de arriba.</span>
+                        </div>
+
+                        <div class="form-group col-span-2">
+                            <label for="p-notes">Historial y Síntomas de Ingreso</label>
+                            <textarea id="p-notes" class="form-control text-area" rows="3" placeholder="Detalle los síntomas, alergias relevantes o notas generales de admisión..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="btn-cancel-patient">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="btn-submit-patient">Guardar Paciente</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Confirmar Eliminación -->
+    <div class="modal" id="delete-modal">
+        <div class="modal-content card max-w-sm">
+            <div class="modal-header bg-danger-soft">
+                <h3 class="text-danger flex items-center gap-2">
+                    <i data-lucide="trash-2"></i> Confirmar Eliminación
+                </h3>
+            </div>
+            <div class="modal-body py-4">
+                <p>¿Estás seguro de que deseas eliminar permanentemente al paciente <strong id="delete-patient-name"></strong>?</p>
+                <p class="text-muted text-sm mt-2">Esta acción es irreversible y removerá el registro de los respaldos locales.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="btn-cancel-delete">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btn-confirm-delete">Eliminar Registro</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast de Notificaciones -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="js/app.js" type="module"></script>
+</body>
+</html>
