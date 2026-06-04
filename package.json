@@ -1,0 +1,12 @@
+{
+  "name": "registro-pacientes-saludgest",
+  "version": "1.0.0",
+  "description": "Proyecto Final - Registro Básico de Pacientes",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx vite --host"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

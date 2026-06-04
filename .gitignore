@@ -1,0 +1,27 @@
+# Dependencias de Node
+node_modules/
+.npm/
+
+# Caché y archivos temporales de empaquetadores
+.vite/
+dist/
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Configuraciones locales de IDEs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Archivos de entorno local
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
