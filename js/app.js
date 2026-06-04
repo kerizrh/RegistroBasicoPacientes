@@ -3,6 +3,7 @@
  */
 import { PatientService } from './patientService.js';
 import { GeolocationHelper } from './geolocationHelper.js';
+import { DoctorsService } from './doctorsService.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Inicializar iconos Lucide
@@ -639,19 +640,102 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Inicializaciones básicas de la Fase 1, 2 & 3
-    initTheme();
-    loadPatients();
-    loadDashboardLocation();
-    
-    // Verificar si hay hash en la URL para navegar
-    const currentHash = window.location.hash.replace('#', '');
-    if (sections[currentHash]) {
-        switchSection(currentHash);
-    } else {
-        switchSection('dashboard');
-    }
+        /* -------------------------------------------------------------
+           DIRECTORIO DE PERSONAL MÉDICO (API REST FETCH)
+           ------------------------------------------------------------- */
+        const doctorsGrid = document.getElementById('doctors-list-grid');
+        const btnRefreshDoctors = document.getElementById('btn-refresh-doctors');
 
-    console.log('SaludGest inicializado correctamente - Fase 3 Geolocalización Lista');
-});
+        const loadDoctorsDirectory = async () => {
+            if (!doctorsGrid) return;
+            
+            doctorsGrid.innerHTML = `
+                <div class="loading-state card">
+                    <div class="spinner"></div>
+                    <p>Cargando médicos de guardia desde la API...</p>
+                </div>
+            `;
+
+            try {
+                const doctors = await DoctorsService.getDoctorsOnDuty();
+                doctorsGrid.innerHTML = '';
+                
+                doctors.forEach(doc => {
+                    const card = document.createElement('div');
+                    card.className = 'doctor-card card';
+                    
+                    const badgeClass = doc.status === 'Disponible' ? 'badge-stable' : 'badge-obs';
+
+                    card.innerHTML = `
+                        <img src="${doc.avatar}" alt="${escapeHtml(doc.name)}" class="doctor-card-avatar">
+                        <h4 class="doctor-card-name">${escapeHtml(doc.name)}</h4>
+                        <span class="doctor-card-specialty">${escapeHtml(doc.specialty)}</span>
+                        <span class="badge ${badgeClass} mb-4">${doc.status}</span>
+                        <div class="doctor-card-info">
+                            <div class="doctor-card-info-item">
+                                <i data-lucide="phone"></i>
+                                <span>${escapeHtml(doc.phone)}</span>
+                            </div>
+                            <div class="doctor-card-info-item">
+                                <i data-lucide="mail"></i>
+                                <span>${escapeHtml(doc.email)}</span>
+                            </div>
+                            <div class="doctor-card-info-item">
+                                <i data-lucide="map-pin"></i>
+                                <span>Sede: ${escapeHtml(doc.city)}</span>
+                            </div>
+                        </div>
+                    `;
+                    doctorsGrid.appendChild(card);
+                });
+
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+
+                // Disparar evento para actualizar widget del dashboard en el siguiente commit
+                window.doctorsData = doctors;
+                const event = new CustomEvent('doctorsLoaded', { detail: doctors });
+                window.dispatchEvent(event);
+            } catch (error) {
+                console.error(error);
+                doctorsGrid.innerHTML = `
+                    <div class="card col-span-2 text-center py-8">
+                        <div class="text-danger mb-4">
+                            <i data-lucide="alert-circle" style="width: 48px; height: 48px; margin: auto;"></i>
+                        </div>
+                        <h3>Error al obtener directorio</h3>
+                        <p class="text-muted mb-4">${error.message || 'Error de conexión.'}</p>
+                        <button class="btn btn-primary" id="btn-retry-doctors">
+                            <i data-lucide="rotate-cw"></i> Reintentar
+                        </button>
+                    </div>
+                `;
+                if (window.lucide) window.lucide.createIcons();
+                
+                const btnRetry = document.getElementById('btn-retry-doctors');
+                if (btnRetry) btnRetry.addEventListener('click', loadDoctorsDirectory);
+            }
+        };
+
+        if (btnRefreshDoctors) {
+            btnRefreshDoctors.addEventListener('click', loadDoctorsDirectory);
+        }
+
+        // Inicializaciones básicas de la Fase 1, 2 & 3
+        initTheme();
+        loadPatients();
+        loadDashboardLocation();
+        loadDoctorsDirectory();
+        
+        // Verificar si hay hash en la URL para navegar
+        const currentHash = window.location.hash.replace('#', '');
+        if (sections[currentHash]) {
+            switchSection(currentHash);
+        } else {
+            switchSection('dashboard');
+        }
+
+        console.log('SaludGest inicializado correctamente - Fase 3 Directorio Médico Listo');
+    });
 

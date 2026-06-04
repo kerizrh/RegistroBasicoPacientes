@@ -20,15 +20,16 @@ export const DoctorsService = {
      */
     async getDoctorsOnDuty() {
         try {
-            // Consumo de API REST con parámetros seleccionados
-            const response = await fetch('https://randomuser.me/api/?results=6&inc=name,picture,email,cell,location,id&nat=us,es,mx');
-            
+            // Consumo de API REST con parámetros seleccionados desde variables de entorno (.env)
+            const apiUrl = import.meta.env.VITE_API_DOCTORS_URL;
+            const response = await fetch(apiUrl);
+
             if (!response.ok) {
                 throw new Error('Error en la respuesta del servidor médico.');
             }
 
             const data = await response.json();
-            
+
             if (!data || !data.results) {
                 throw new Error('Respuesta inválida de la API.');
             }
