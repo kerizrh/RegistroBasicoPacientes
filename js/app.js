@@ -11,6 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
         window.lucide.createIcons();
     }
 
+    // Inicializar Web Worker
+    const statsWorker = new Worker('js/worker.js');
+
     // Elementos del DOM
     const sidebar = document.querySelector('.sidebar');
     const mobileToggle = document.getElementById('mobile-toggle');
@@ -442,9 +445,55 @@ document.addEventListener('DOMContentLoaded', () => {
     const patientSearch = document.getElementById('patient-search');
     const filterStatus = document.getElementById('filter-status');
 
+    /* -------------------------------------------------------------
+       INTEGRACIÓN DE WEB WORKER PARA ESTADÍSTICAS
+       ------------------------------------------------------------- */
+    const updateStatistics = () => {
+        try {
+            const patients = PatientService.getAll();
+            statsWorker.postMessage(patients);
+        } catch (error) {
+            console.error('Error al enviar datos al Web Worker:', error);
+        }
+    };
+
+    statsWorker.onmessage = (e) => {
+        const stats = e.data;
+        
+        // Actualizar métricas del Dashboard en el DOM
+        const totalEl = document.getElementById('metric-total-patients');
+        const criticalEl = document.getElementById('metric-critical-patients');
+        const avgAgeEl = document.getElementById('metric-avg-age');
+        const criticalDescEl = document.getElementById('metric-critical-desc');
+
+        if (totalEl) totalEl.textContent = stats.total;
+        if (criticalEl) criticalEl.textContent = stats.critical;
+        if (avgAgeEl) avgAgeEl.textContent = stats.avgAge.toFixed(1);
+
+        if (criticalDescEl) {
+            if (stats.critical === 0) {
+                criticalDescEl.textContent = 'Ningún caso crítico registrado';
+                criticalDescEl.className = 'metric-footer text-success';
+            } else {
+                criticalDescEl.textContent = 'Requieren atención inmediata';
+                criticalDescEl.className = 'metric-footer text-danger';
+            }
+        }
+
+        // Guardar estadísticas para uso de gráficos en el siguiente commit
+        window.dashboardStats = stats;
+        
+        // Disparar evento por si otros componentes necesitan enterarse
+        const event = new CustomEvent('statsUpdated', { detail: stats });
+        window.dispatchEvent(event);
+    };
+
     const loadPatients = () => {
         try {
             const patients = PatientService.getAll();
+            
+            // Disparar recálculo de estadísticas en segundo plano
+            updateStatistics();
             
             // Obtener criterios de búsqueda y filtros activos
             const searchTerm = patientSearch ? patientSearch.value.trim().toLowerCase() : '';
