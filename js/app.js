@@ -645,76 +645,129 @@ document.addEventListener('DOMContentLoaded', () => {
            ------------------------------------------------------------- */
         const doctorsGrid = document.getElementById('doctors-list-grid');
         const btnRefreshDoctors = document.getElementById('btn-refresh-doctors');
+        const dashboardDoctorsList = document.getElementById('dashboard-doctors-list');
+        const staffCountBadge = document.getElementById('staff-count');
 
         const loadDoctorsDirectory = async () => {
-            if (!doctorsGrid) return;
-            
-            doctorsGrid.innerHTML = `
-                <div class="loading-state card">
-                    <div class="spinner"></div>
-                    <p>Cargando médicos de guardia desde la API...</p>
-                </div>
-            `;
+            // Mostrar estados de carga en directorio y dashboard widget
+            if (doctorsGrid) {
+                doctorsGrid.innerHTML = `
+                    <div class="loading-state card">
+                        <div class="spinner"></div>
+                        <p>Cargando médicos de guardia desde la API...</p>
+                    </div>
+                `;
+            }
+            if (dashboardDoctorsList) {
+                dashboardDoctorsList.innerHTML = `
+                    <div class="loading-state py-4">
+                        <div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div>
+                        <p class="text-xs text-muted">Obteniendo médicos...</p>
+                    </div>
+                `;
+            }
+            if (staffCountBadge) {
+                staffCountBadge.textContent = '...';
+            }
 
             try {
                 const doctors = await DoctorsService.getDoctorsOnDuty();
-                doctorsGrid.innerHTML = '';
                 
-                doctors.forEach(doc => {
-                    const card = document.createElement('div');
-                    card.className = 'doctor-card card';
-                    
-                    const badgeClass = doc.status === 'Disponible' ? 'badge-stable' : 'badge-obs';
+                // Renderizar en directorio médico si la grilla está en pantalla
+                if (doctorsGrid) {
+                    doctorsGrid.innerHTML = '';
+                    doctors.forEach(doc => {
+                        const card = document.createElement('div');
+                        card.className = 'doctor-card card';
+                        const badgeClass = doc.status === 'Disponible' ? 'badge-stable' : 'badge-obs';
 
-                    card.innerHTML = `
-                        <img src="${doc.avatar}" alt="${escapeHtml(doc.name)}" class="doctor-card-avatar">
-                        <h4 class="doctor-card-name">${escapeHtml(doc.name)}</h4>
-                        <span class="doctor-card-specialty">${escapeHtml(doc.specialty)}</span>
-                        <span class="badge ${badgeClass} mb-4">${doc.status}</span>
-                        <div class="doctor-card-info">
-                            <div class="doctor-card-info-item">
-                                <i data-lucide="phone"></i>
-                                <span>${escapeHtml(doc.phone)}</span>
+                        card.innerHTML = `
+                            <img src="${doc.avatar}" alt="${escapeHtml(doc.name)}" class="doctor-card-avatar">
+                            <h4 class="doctor-card-name">${escapeHtml(doc.name)}</h4>
+                            <span class="doctor-card-specialty">${escapeHtml(doc.specialty)}</span>
+                            <span class="badge ${badgeClass} mb-4">${doc.status}</span>
+                            <div class="doctor-card-info">
+                                <div class="doctor-card-info-item">
+                                    <i data-lucide="phone"></i>
+                                    <span>${escapeHtml(doc.phone)}</span>
+                                </div>
+                                <div class="doctor-card-info-item">
+                                    <i data-lucide="mail"></i>
+                                    <span>${escapeHtml(doc.email)}</span>
+                                </div>
+                                <div class="doctor-card-info-item">
+                                    <i data-lucide="map-pin"></i>
+                                    <span>Sede: ${escapeHtml(doc.city)}</span>
+                                </div>
                             </div>
-                            <div class="doctor-card-info-item">
-                                <i data-lucide="mail"></i>
-                                <span>${escapeHtml(doc.email)}</span>
+                        `;
+                        doctorsGrid.appendChild(card);
+                    });
+                }
+
+                // Renderizar vista previa en el widget del Dashboard (primeros 4 médicos)
+                if (dashboardDoctorsList) {
+                    dashboardDoctorsList.innerHTML = '';
+                    const previewDoctors = doctors.slice(0, 4);
+                    
+                    previewDoctors.forEach(doc => {
+                        const item = document.createElement('div');
+                        item.className = 'doctor-item';
+                        const badgeClass = doc.status === 'Disponible' ? 'badge-stable' : 'badge-obs';
+                        
+                        item.innerHTML = `
+                            <img src="${doc.avatar}" alt="${escapeHtml(doc.name)}" class="doctor-avatar">
+                            <div class="doctor-details">
+                                <span class="doctor-name">${escapeHtml(doc.name)}</span>
+                                <span class="doctor-specialty">${escapeHtml(doc.specialty)}</span>
                             </div>
-                            <div class="doctor-card-info-item">
-                                <i data-lucide="map-pin"></i>
-                                <span>Sede: ${escapeHtml(doc.city)}</span>
-                            </div>
-                        </div>
-                    `;
-                    doctorsGrid.appendChild(card);
-                });
+                            <span class="doctor-tag ${badgeClass}">${doc.status}</span>
+                        `;
+                        dashboardDoctorsList.appendChild(item);
+                    });
+                }
+
+                if (staffCountBadge) {
+                    staffCountBadge.textContent = `${doctors.length} Activos`;
+                }
 
                 if (window.lucide) {
                     window.lucide.createIcons();
                 }
 
-                // Disparar evento para actualizar widget del dashboard en el siguiente commit
                 window.doctorsData = doctors;
-                const event = new CustomEvent('doctorsLoaded', { detail: doctors });
-                window.dispatchEvent(event);
             } catch (error) {
                 console.error(error);
-                doctorsGrid.innerHTML = `
-                    <div class="card col-span-2 text-center py-8">
-                        <div class="text-danger mb-4">
-                            <i data-lucide="alert-circle" style="width: 48px; height: 48px; margin: auto;"></i>
-                        </div>
-                        <h3>Error al obtener directorio</h3>
-                        <p class="text-muted mb-4">${error.message || 'Error de conexión.'}</p>
-                        <button class="btn btn-primary" id="btn-retry-doctors">
-                            <i data-lucide="rotate-cw"></i> Reintentar
-                        </button>
-                    </div>
-                `;
-                if (window.lucide) window.lucide.createIcons();
                 
-                const btnRetry = document.getElementById('btn-retry-doctors');
-                if (btnRetry) btnRetry.addEventListener('click', loadDoctorsDirectory);
+                if (doctorsGrid) {
+                    doctorsGrid.innerHTML = `
+                        <div class="card col-span-2 text-center py-8">
+                            <div class="text-danger mb-4">
+                                <i data-lucide="alert-circle" style="width: 48px; height: 48px; margin: auto;"></i>
+                            </div>
+                            <h3>Error al obtener directorio</h3>
+                            <p class="text-muted mb-4">${error.message || 'Error de conexión.'}</p>
+                            <button class="btn btn-primary" id="btn-retry-doctors">
+                                <i data-lucide="rotate-cw"></i> Reintentar
+                            </button>
+                        </div>
+                    `;
+                    const btnRetry = document.getElementById('btn-retry-doctors');
+                    if (btnRetry) btnRetry.addEventListener('click', loadDoctorsDirectory);
+                }
+
+                if (dashboardDoctorsList) {
+                    dashboardDoctorsList.innerHTML = `
+                        <p class="text-danger text-center text-xs py-4">
+                            Error al sincronizar médicos de guardia.
+                        </p>
+                    `;
+                }
+                if (staffCountBadge) {
+                    staffCountBadge.textContent = 'Error';
+                }
+
+                if (window.lucide) window.lucide.createIcons();
             }
         };
 
