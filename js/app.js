@@ -365,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnCancelPatient.addEventListener('click', closeModal);
     btnCloseModal.addEventListener('click', closeModal);
 
-    // Botón para geolocalizar al registrar paciente
+    // Botón para geolocalizar al registrar paciente (GPS)
     const btnGetLocation = document.getElementById('btn-get-location');
     if (btnGetLocation) {
         btnGetLocation.addEventListener('click', async () => {
@@ -385,6 +385,44 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnGetLocation.innerHTML = originalHTML;
                 if (window.lucide) window.lucide.createIcons();
             }
+        });
+    }
+
+    // Toggle búsqueda por dirección
+    const btnSearchAddressToggle = document.getElementById('btn-search-address-toggle');
+    const addressSearchGroup = document.getElementById('address-search-group');
+    if (btnSearchAddressToggle && addressSearchGroup) {
+        btnSearchAddressToggle.addEventListener('click', () => {
+            addressSearchGroup.classList.toggle('hidden');
+        });
+    }
+
+    // Búsqueda por dirección (Nominatim / OpenStreetMap)
+    const btnSearchAddress = document.getElementById('btn-search-address');
+    const pAddressQuery = document.getElementById('p-address-query');
+    if (btnSearchAddress && pAddressQuery) {
+        btnSearchAddress.addEventListener('click', async () => {
+            btnSearchAddress.disabled = true;
+            const originalHTML = btnSearchAddress.innerHTML;
+            btnSearchAddress.innerHTML = '<div class="spinner text-xs" style="width:12px;height:12px;border-width:2px;margin:0;"></div>';
+            
+            try {
+                const result = await GeolocationHelper.searchByAddress(pAddressQuery.value);
+                pLat.value = result.latitude.toFixed(6);
+                pLng.value = result.longitude.toFixed(6);
+                showToast(`Coordenadas obtenidas: ${result.displayName.substring(0, 60)}...`, 'success');
+                addressSearchGroup.classList.add('hidden');
+            } catch (error) {
+                showToast(error.message || 'Error en la búsqueda.', 'warning');
+            } finally {
+                btnSearchAddress.disabled = false;
+                btnSearchAddress.innerHTML = originalHTML;
+                if (window.lucide) window.lucide.createIcons();
+            }
+        });
+
+        pAddressQuery.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') btnSearchAddress.click();
         });
     }
 

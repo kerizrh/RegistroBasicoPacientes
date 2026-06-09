@@ -322,15 +322,29 @@
                         <div class="form-group col-span-2">
                             <label class="flex items-center justify-between">
                                 <span>Coordenadas de Ingreso</span>
-                                <button type="button" class="btn-text" id="btn-get-location">
-                                    <i data-lucide="map-pin"></i> Obtener Ubicación Actual
-                                </button>
+                                <div class="location-buttons">
+                                    <button type="button" class="btn-text" id="btn-get-location">
+                                        <i data-lucide="map-pin"></i> GPS
+                                    </button>
+                                    <button type="button" class="btn-text" id="btn-search-address-toggle">
+                                        <i data-lucide="search"></i> Buscar Dirección
+                                    </button>
+                                </div>
                             </label>
                             <div class="location-input-group">
                                 <input type="text" id="p-lat" class="form-control" placeholder="Latitud (ej. 13.6893)" readonly>
                                 <input type="text" id="p-lng" class="form-control" placeholder="Longitud (ej. -89.1872)" readonly>
                             </div>
-                            <span class="help-text">La ubicación se captura automáticamente o mediante el botón de arriba.</span>
+                            <div class="address-search-group hidden" id="address-search-group">
+                                <div class="flex gap-2 mt-2">
+                                    <input type="text" id="p-address-query" class="form-control" placeholder="Ej. San Salvador, El Salvador">
+                                    <button type="button" class="btn btn-primary btn-sm" id="btn-search-address">
+                                        <i data-lucide="search"></i>
+                                    </button>
+                                </div>
+                                <span class="help-text">Busca una dirección y se rellenarán las coordenadas automáticamente.</span>
+                            </div>
+                            <span class="help-text" id="location-help-text">Usa GPS o búsqueda por dirección para obtener coordenadas.</span>
                         </div>
 
                         <div class="form-group col-span-2">
