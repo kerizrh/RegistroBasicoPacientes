@@ -95,12 +95,6 @@ Copia el archivo de ejemplo y completa la URL de la API de médicos:
 cp .env.example .env
 ```
 
-Edita `.env` y reemplaza el valor de la variable:
-
-```env
-VITE_API_DOCTORS_URL=https://randomuser.me/api/?results=8&nat=es,mx,co
-```
-
 ### 3. Iniciar el servidor de desarrollo
 
 ```bash
