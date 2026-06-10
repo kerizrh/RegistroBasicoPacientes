@@ -62,7 +62,8 @@ RegistroBasicoPacientes/
 - **Web Workers API** — procesamiento de estadísticas en hilo separado
 - **Geolocation API** — captura de coordenadas del usuario
 - **Fetch API** — consumo de API REST externa
-- **localStorage** — persistencia de pacientes sin backend
+- **localStorage** — persistencia permanente de pacientes y preferencia de tema
+- **sessionStorage** — persistencia temporal de filtros de búsqueda durante la sesión
 - **Netlify** — plataforma de despliegue
 
 ### Funcionalidades
@@ -127,6 +128,7 @@ El proyecto incluye `netlify.toml` preconfigurado. Basta con conectar el reposit
 
 ## Notas
 
-- Los datos de pacientes se almacenan únicamente en el `localStorage` del navegador; si se limpia el almacenamiento del navegador, los registros se perderán.
+- Los datos de pacientes se almacenan en `localStorage`; si se limpia el almacenamiento del navegador, los registros se perderán.
+- Los filtros de búsqueda se guardan en `sessionStorage` y se borran automáticamente al cerrar la pestaña.
 - La geolocalización requiere que el usuario otorgue permisos al navegador.
 - El directorio médico usa datos ficticios generados por `randomuser.me`; no representa personal médico real.
