@@ -4,6 +4,7 @@
 import { PatientService } from './patientService.js';
 import { GeolocationHelper } from './geolocationHelper.js';
 import { DoctorsService } from './doctorsService.js';
+import { ReportService } from './reportService.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Inicializar iconos Lucide
@@ -494,6 +495,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const filterStatus = document.getElementById('filter-status');
 
     /* -------------------------------------------------------------
+       INTEGRACIÓN DE SERVICIO DE REPORTES
+       ------------------------------------------------------------- */
+    const btnExportExcel = document.getElementById('btnExportExcel');
+
+    if (btnExportExcel) {
+
+        btnExportExcel.addEventListener('click', () => {
+    
+            const patients = PatientService.getAll();
+    
+            if (patients.length === 0) {
+                alert('No hay pacientes registrados para exportar.');
+                return;
+            }
+    
+            ReportService.exportPatientsToExcel(patients);
+        });
+    }
+    
+    /* -------------------------------------------------------------
        INTEGRACIÓN DE WEB WORKER & CHART.JS PARA ESTADÍSTICAS
        ------------------------------------------------------------- */
     let statusChart = null;
@@ -681,9 +702,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     </td>
                     <td>${patient.age} años / ${patient.gender}</td>
                     <td>
-                        <div class="flex flex-col">
-                            <span>${escapeHtml(patient.phone)}</span>
-                            <span class="text-xs text-muted">${escapeHtml(patient.email) || 'Sin correo'}</span>
+                        <div class="patient-info-cell">
+                            <span class="patient-name-text">
+                             ${escapeHtml(patient.phone)}
+                            </span>
+                            <span class="patient-id-text">
+                                ${escapeHtml(patient.email) || 'Sin correo'}
+                            </span>
                         </div>
                     </td>
                     <td><span class="badge bg-light-primary text-primary">${patient.bloodType}</span></td>
