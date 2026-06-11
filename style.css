@@ -923,6 +923,14 @@ body.dark .table tbody tr:hover {
 /* -------------------------------------------------------------
    VENTANAS MODALES (MODALS)
    ------------------------------------------------------------- */
+
+#patient-form {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
 .modal {
     position: fixed;
     left: 0;
@@ -1348,5 +1356,264 @@ body.dark .table tbody tr:hover {
 
     .col-span-2 {
         grid-column: span 1;
+    }
+
+    /* Tabla de Pacientes - Conversión a Tarjetas */
+    .table {
+        display: block;
+        border-collapse: initial;
+    }
+
+    .table thead {
+        display: none;
+    }
+
+    .table tbody {
+        display: block;
+    }
+
+    .table tbody tr {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 1.5rem;
+        padding: 1.5rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        background-color: var(--bg-card);
+        gap: 0;
+    }
+
+    .table td {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border);
+        white-space: normal;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        font-size: 1.1rem;
+        text-align: left;
+        line-height: 1.6;
+    }
+
+    .table td:last-of-type {
+        border-bottom: none;
+        padding-top: 1.5rem;
+        margin-top: 0.5rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin-right: 1rem;
+    }
+
+    .table td:first-child {
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        gap: 0;
+        padding: 0 0 1rem 0;
+    }
+
+    .table td:first-child::before {
+        display: none;
+    }
+
+    .patient-info-cell {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .patient-name-text {
+        font-weight: 600;
+        font-family: var(--font-heading);
+        font-size: 1.2rem;
+    }
+
+    .patient-id-text {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .table td.text-right {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        text-align: left;
+    }
+
+    .table td.text-right::before {
+        display: none;
+    }
+
+    .action-cell {
+        width: 100%;
+        justify-content: flex-end;
+        gap: 1.5rem;
+    }
+
+    .table-responsive {
+        overflow-x: visible;
+    }
+}
+
+@media (max-width: 640px) {
+    .main-content {
+        padding: 1rem;
+    }
+
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .search-box {
+        min-width: auto;
+        width: 100%;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .table tbody tr {
+        padding: 1.25rem;
+        margin-bottom: 1.25rem;
+        gap: 0;
+    }
+
+    .table td {
+        font-size: 1.05rem;
+        line-height: 1.6;
+        padding: 0.9rem 0;
+    }
+
+    .table td::before {
+        font-size: 0.93rem;
+        margin-right: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .welcome-text h1 {
+        font-size: 1.25rem;
+    }
+
+    .page-title {
+        font-size: 1.25rem;
+    }
+
+    .action-bar {
+        gap: 0.75rem;
+    }
+
+    .btn {
+        font-size: 0.85rem;
+        padding: 0.6rem 1rem;
+    }
+
+    .btn-icon {
+        width: 32px;
+        height: 32px;
+    }
+
+    .btn span {
+        display: none;
+    }
+
+    .btn-icon span {
+        display: none;
+    }
+
+    .table tbody tr {
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        gap: 0;
+    }
+
+    .table td::before {
+        font-size: 0.93rem;
+        margin-right: 0.8rem;
+    }
+
+    .table td {
+        font-size: 0.95rem;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        text-align: left;
+        line-height: 1.5;
+        padding: 0.8rem 0;
+    }
+
+    .table td.text-right {
+        text-align: left;
+    }
+
+    .patient-info-cell {
+        width: 100%;
+    }
+
+    .action-cell {
+        width: 100%;
+        margin-top: 0.5rem;
+        gap: 0.75rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .main-content {
+        padding: 0.75rem;
+    }
+
+    .welcome-text h1 {
+        font-size: 1rem;
+    }
+
+    .page-title {
+        font-size: 1rem;
+    }
+
+    .table tbody tr {
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+        border-radius: var(--radius-sm);
+        gap: 0;
+    }
+
+    .table td {
+        font-size: 0.85rem;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        text-align: left;
+        line-height: 1.5;
+        padding: 0.6rem 0;
+    }
+
+    .table td::before {
+        font-size: 0.8rem;
+        margin-right: 0.6rem;
+    }
+
+    .table td.text-right {
+        text-align: left;
+    }
+
+    .table td::before {
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .badge {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.5rem;
     }
 }

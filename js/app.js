@@ -694,32 +694,26 @@ document.addEventListener('DOMContentLoaded', () => {
                     : 'No registrada';
 
                 tr.innerHTML = `
-                    <td>
+                    <td data-label="Paciente">
                         <div class="patient-info-cell">
-                            <span class="patient-name-text">${escapeHtml(patient.name)}</span>
+                            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 0.3rem;">
+                                <span class="patient-name-text">${escapeHtml(patient.name)}</span>
+                                <span class="badge ${badgeClass}">${patient.status}</span>
+                            </div>
                             <span class="patient-id-text">${patient.id}</span>
                         </div>
                     </td>
-                    <td>${patient.age} años / ${patient.gender}</td>
-                    <td>
-                        <div class="patient-info-cell">
-                            <span class="patient-name-text">
-                             ${escapeHtml(patient.phone)}
-                            </span>
-                            <span class="patient-id-text">
-                                ${escapeHtml(patient.email) || 'Sin correo'}
-                            </span>
-                        </div>
-                    </td>
-                    <td><span class="badge bg-light-primary text-primary">${patient.bloodType}</span></td>
-                    <td><span class="badge ${badgeClass}">${patient.status}</span></td>
-                    <td>
+                    <td data-label="Edad / Género">${patient.age} años / ${patient.gender}</td>
+                    <td data-label="Teléfono">${escapeHtml(patient.phone)}</td>
+                    <td data-label="Email">${escapeHtml(patient.email) || 'Sin correo'}</td>
+                    <td data-label="Grupo Sanguíneo"><span class="badge bg-light-primary text-primary">${patient.bloodType}</span></td>
+                    <td data-label="Ubicación Ingreso">
                         <span class="text-sm flex items-center gap-1">
                             <i data-lucide="map-pin" class="text-muted" style="width: 14px; height: 14px;"></i>
                             <span>${locationText}</span>
                         </span>
                     </td>
-                    <td class="text-right">
+                    <td data-label="Acciones" class="text-right">
                         <div class="action-cell">
                             <button class="btn-icon btn-edit-patient" data-id="${patient.id}" title="Editar">
                                 <i data-lucide="edit-3"></i>
