@@ -696,17 +696,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 tr.innerHTML = `
                     <td data-label="Paciente">
                         <div class="patient-info-cell">
-                            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 0.3rem;">
-                                <span class="patient-name-text">${escapeHtml(patient.name)}</span>
-                                <span class="badge ${badgeClass}">${patient.status}</span>
-                            </div>
-                            <span class="patient-id-text">${patient.id}</span>
+                            <span class="patient-name-text">
+                                ${escapeHtml(patient.name)}
+                            </span>
+                            <span class="patient-id-text">
+                                ${patient.id}
+                            </span>
                         </div>
                     </td>
                     <td data-label="Edad / Género">${patient.age} años / ${patient.gender}</td>
-                    <td data-label="Teléfono">${escapeHtml(patient.phone)}</td>
-                    <td data-label="Email">${escapeHtml(patient.email) || 'Sin correo'}</td>
+                    <td data-label="Contacto">
+                        <div class="contact-info-cell">
+                            <span class="contact-phone-text">
+                                ${escapeHtml(patient.phone)}
+                            </span>
+                            <span class="contact-email-text">
+                                ${escapeHtml(patient.email) || 'Sin correo'}
+                            </span>
+                        </div>
+                    </td>
+                    </td>
                     <td data-label="Grupo Sanguíneo"><span class="badge bg-light-primary text-primary">${patient.bloodType}</span></td>
+                    <td data-label="Estado">
+                        <span class="badge ${badgeClass}">
+                            ${patient.status}
+                        </span>
+                    </td>
                     <td data-label="Ubicación Ingreso">
                         <span class="text-sm flex items-center gap-1">
                             <i data-lucide="map-pin" class="text-muted" style="width: 14px; height: 14px;"></i>

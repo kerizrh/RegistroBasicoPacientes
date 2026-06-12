@@ -1309,6 +1309,21 @@ body.dark .table tbody tr:hover {
     padding-bottom: 1rem;
 }
 
+.contact-info-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.contact-phone-text {
+    font-weight: 600;
+}
+
+.contact-email-text {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
 /* -------------------------------------------------------------
    RESPONSIVIDAD (MEDIA QUERIES)
    ------------------------------------------------------------- */
@@ -1353,6 +1368,13 @@ body.dark .table tbody tr:hover {
     .form-grid {
         grid-template-columns: 1fr;
     }
+
+    .form-group label.flex {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
 
     .col-span-2 {
         grid-column: span 1;
@@ -1463,6 +1485,50 @@ body.dark .table tbody tr:hover {
     .table-responsive {
         overflow-x: visible;
     }
+
+    .contact-info-cell {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.2rem;
+        text-align: right;
+    }
+    
+    .contact-phone-text {
+        font-weight: 600;
+    }
+    
+    .contact-email-text {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .modal-content {
+        width: 95vw;
+        max-width: 95vw;
+    }
+
+    .location-buttons {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .location-buttons .btn {
+        width: 100%;
+    }
+
+    .address-search-group .flex {
+        flex-direction: column;
+    }
+
+    .address-search-group .btn {
+        width: 100%;
+    }
+
+    .location-input-group {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 640px) {
@@ -1565,6 +1631,34 @@ body.dark .table tbody tr:hover {
         width: 100%;
         margin-top: 0.5rem;
         gap: 0.75rem;
+    }
+
+    .contact-info-cell {
+        max-width: 60%;
+    }
+    
+    .contact-email-text {
+        word-break: break-word;
+        text-align: right;
+    }
+
+    .modal-body {
+        padding: 1rem;
+    }
+
+    .modal-header,
+    .modal-footer {
+        padding: 1rem;
+    }
+
+    .modal-content {
+        width: calc(100vw - 1rem);
+        max-width: calc(100vw - 1rem);
+        max-height: 95vh;
+    }
+
+    .form-control {
+        font-size: 16px;
     }
 }
 
