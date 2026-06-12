@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Inicializar Web Worker
-    const statsWorker = new Worker('js/worker.js');
+    const statsWorker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
 
     // Elementos del DOM
     const sidebar = document.querySelector('.sidebar');
